@@ -7,10 +7,10 @@ export default function ShopLayout({ children }: { children: React.ReactNode }) 
   return (
     <ShopI18nProvider>
       <CartProvider>
-        <div className="min-h-screen bg-[#E8E0D0] flex flex-col items-center">
-          <div className="w-full max-w-[480px] min-h-screen relative flex flex-col bg-[#F0EBE0]">
+        <div dir="rtl" style={{ backgroundColor: '#DDD4C4', minHeight: '100vh', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ width: '100%', maxWidth: 480, minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#F0EBE0' }}>
             <ShopHeader />
-            <main className="flex-1 pb-20 pt-14">
+            <main style={{ flex: 1, paddingBottom: 64 }}>
               {children}
             </main>
             <BottomNav />

@@ -22,8 +22,8 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 z-40 w-full max-w-[480px] h-16 bg-white border-t border-warm-border flex items-center justify-around shadow-[0_-2px_8px_rgba(0,0,0,0.06)]"
-      style={{ left: '50%', transform: 'translateX(-50%)' }}
+      className="w-full h-16 flex items-center justify-around flex-shrink-0"
+      style={{ backgroundColor: '#FAF7F2', borderTop: '1px solid #DDD4C4', boxShadow: '0 -2px 8px rgba(0,0,0,0.04)', position: 'sticky', bottom: 0, zIndex: 40 }}
     >
       {tabs.map(({ href, label, icon: Icon, exact, badge }) => {
         const active = exact ? pathname === href : pathname.startsWith(href)

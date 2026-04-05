@@ -5,20 +5,24 @@ interface CategoryCardProps {
   href: string
   label: string
   sublabel: string
-  bgClass: string
+  bg: string   // inline style color
   icon: LucideIcon
 }
 
-export function CategoryCard({ href, label, sublabel, bgClass, icon: Icon }: CategoryCardProps) {
+export function CategoryCard({ href, label, sublabel, bg, icon: Icon }: CategoryCardProps) {
   return (
-    <Link href={href} className={`${bgClass} rounded-2xl p-5 flex flex-col justify-between h-36 relative overflow-hidden block`}>
-      <Icon size={64} className="absolute -top-2 -left-2 opacity-10 text-brown-800" strokeWidth={1} />
+    <Link
+      href={href}
+      style={{ backgroundColor: bg }}
+      className="rounded-2xl p-4 flex flex-col justify-between h-32 relative overflow-hidden"
+    >
+      <Icon size={56} className="absolute -top-1 -left-1 opacity-10 text-[#3B2010]" strokeWidth={1} />
       <div />
       <div>
-        <p className="text-xs text-brown-500 mb-0.5">{sublabel}</p>
+        <p className="text-xs text-[#9B7050] mb-0.5">{sublabel}</p>
         <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-brown-800">{label}</span>
-          <span className="text-brown-500 text-lg">←</span>
+          <span className="text-base font-bold text-[#3B2010]">{label}</span>
+          <span className="text-[#9B7050] text-base">←</span>
         </div>
       </div>
     </Link>
