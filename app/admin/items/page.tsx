@@ -100,19 +100,31 @@ export default function ItemsPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map(item => (
             <div key={item.id} className="card p-4 flex flex-col group hover:shadow-md transition-shadow">
-              <div className="aspect-video rounded-lg bg-cream-100 mb-3 overflow-hidden flex items-center justify-center">
+              <div className="aspect-video rounded-lg bg-cream-100 mb-3 overflow-hidden flex items-center justify-center relative">
                 {item.images[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
                 ) : (
                   <ShoppingBasket className="text-brown-200" size={32} />
                 )}
+                {item.quantity === 0 && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-lg">
+                    <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                      Sold Out
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="flex-1">
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <h3 className="text-sm font-semibold text-brown-800 leading-tight">{item.name}</h3>
-                  <span className="text-sm font-semibold text-brown-600 flex-shrink-0">₪{item.price}</span>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-sm font-semibold text-brown-600">₪{item.price}</div>
+                    <div className={clsx('text-xs', item.quantity === 0 ? 'text-red-500 font-medium' : 'text-brown-400')}>
+                      {item.quantity === 0 ? 'Out of stock' : `Qty: ${item.quantity}`}
+                    </div>
+                  </div>
                 </div>
 
                 {item.description && (

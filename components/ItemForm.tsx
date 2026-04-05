@@ -14,6 +14,7 @@ const EMPTY_DRAFT: ItemDraft = {
   description: '',
   images: [],
   price: 0,
+  quantity: 0,
   category: 'bread',
   can_be_cut: false,
   can_buy_half: null,
@@ -52,8 +53,9 @@ export function ItemForm({ initial, onSave, onCancel }: ItemFormProps) {
   const [draft, setDraft] = useState<ItemDraft>(() =>
     initial
       ? { name: initial.name, description: initial.description, images: initial.images,
-          price: initial.price, category: initial.category ?? 'bread', can_be_cut: initial.can_be_cut,
-          can_buy_half: initial.can_buy_half, is_vegan: initial.is_vegan, available_days: initial.available_days }
+          price: initial.price, quantity: initial.quantity ?? 0, category: initial.category ?? 'bread',
+          can_be_cut: initial.can_be_cut, can_buy_half: initial.can_buy_half,
+          is_vegan: initial.is_vegan, available_days: initial.available_days }
       : { ...EMPTY_DRAFT, available_days: [] }
   )
   const [saving, setSaving] = useState(false)
@@ -162,24 +164,44 @@ export function ItemForm({ initial, onSave, onCancel }: ItemFormProps) {
             <ImageUploader images={draft.images} onChange={imgs => set('images', imgs)} maxImages={3} />
           </div>
 
-          {/* Price */}
-          <div className="w-48">
-            <label className="block text-sm font-medium text-brown-700 mb-1.5">
-              {t('itemForm.price')} <span className="text-red-400">*</span>
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400 text-sm">₪</span>
+          {/* Price + Quantity */}
+          <div className="flex gap-4">
+            <div className="w-48">
+              <label className="block text-sm font-medium text-brown-700 mb-1.5">
+                {t('itemForm.price')} <span className="text-red-400">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400 text-sm">₪</span>
+                <input
+                  type="number"
+                  min={0}
+                  step={0.5}
+                  value={draft.price || ''}
+                  onChange={e => set('price', parseFloat(e.target.value) || 0)}
+                  placeholder="0"
+                  className={clsx('input-base pl-7', errors.price && 'border-red-300 focus:ring-red-200')}
+                />
+              </div>
+              {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price}</p>}
+            </div>
+
+            <div className="w-40">
+              <label className="block text-sm font-medium text-brown-700 mb-1.5">
+                Quantity in stock
+              </label>
               <input
                 type="number"
                 min={0}
-                step={0.5}
-                value={draft.price || ''}
-                onChange={e => set('price', parseFloat(e.target.value) || 0)}
+                step={1}
+                value={draft.quantity ?? ''}
+                onChange={e => set('quantity', parseInt(e.target.value) || 0)}
                 placeholder="0"
-                className={clsx('input-base pl-7', errors.price && 'border-red-300 focus:ring-red-200')}
+                className="input-base"
               />
+              {draft.quantity === 0 && (
+                <p className="text-xs text-red-500 mt-1">Will show as sold out</p>
+              )}
             </div>
-            {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price}</p>}
           </div>
 
           {/* Toggles */}

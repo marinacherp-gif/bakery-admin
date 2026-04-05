@@ -31,6 +31,7 @@ export interface Item {
   description: string
   images: string[]  // array of URLs or base64
   price: number
+  quantity: number
   category: 'bread' | 'pastry'
   can_be_cut: boolean
   can_buy_half: boolean | null  // optional
