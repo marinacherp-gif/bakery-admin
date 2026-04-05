@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Announcement } from '@/lib/supabase'
 import { useI18n } from '@/lib/i18n'
-import { Plus, Trash2, ToggleLeft, ToggleRight, Megaphone } from 'lucide-react'
+import { Plus, Trash2, ToggleLeft, ToggleRight, Megaphone, Calendar } from 'lucide-react'
 import clsx from 'clsx'
 
 export default function AnnouncementsPage() {
@@ -12,12 +12,12 @@ export default function AnnouncementsPage() {
   const [items, setItems] = useState<Announcement[]>([])
   const [loading, setLoading] = useState(true)
   const [newText, setNewText] = useState('')
+  const [startAt, setStartAt] = useState('')
+  const [endAt, setEndAt] = useState('')
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchItems()
-  }, [])
+  useEffect(() => { fetchItems() }, [])
 
   const fetchItems = async () => {
     setLoading(true)
@@ -35,12 +35,19 @@ export default function AnnouncementsPage() {
     setSaving(true)
     const { data, error } = await supabase
       .from('announcements')
-      .insert({ text: newText.trim(), is_active: true })
+      .insert({
+        text: newText.trim(),
+        is_active: true,
+        start_at: startAt ? new Date(startAt).toISOString() : null,
+        end_at: endAt ? new Date(endAt).toISOString() : null,
+      })
       .select()
       .single()
     if (error) console.error('insert announcement:', error)
     if (data) setItems(prev => [data, ...prev])
     setNewText('')
+    setStartAt('')
+    setEndAt('')
     setSaving(false)
   }
 
@@ -58,7 +65,14 @@ export default function AnnouncementsPage() {
   }
 
   const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+    new Date(iso).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+
+  const scheduleLabel = (item: Announcement) => {
+    if (!item.start_at && !item.end_at) return null
+    const start = item.start_at ? formatDate(item.start_at) : 'Now'
+    const end = item.end_at ? formatDate(item.end_at) : 'Forever'
+    return `${start} → ${end}`
+  }
 
   return (
     <div>
@@ -75,21 +89,49 @@ export default function AnnouncementsPage() {
       {/* Add new */}
       <div className="card p-6 mb-6">
         <h2 className="text-sm font-semibold text-brown-700 mb-3">{t('announcements.new')}</h2>
-        <div className="flex gap-3">
-          <textarea
-            value={newText}
-            onChange={e => setNewText(e.target.value)}
-            placeholder={t('announcements.placeholder')}
-            rows={2}
-            className="input-base resize-none flex-1"
-            onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleAdd() }}
-          />
+        <textarea
+          value={newText}
+          onChange={e => setNewText(e.target.value)}
+          placeholder={t('announcements.placeholder')}
+          rows={2}
+          className="input-base resize-none w-full mb-4"
+          onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleAdd() }}
+        />
+
+        <div className="flex flex-wrap gap-4 mb-4">
+          <div className="flex-1 min-w-48">
+            <label className="block text-xs font-medium text-brown-500 mb-1.5">
+              <Calendar size={12} className="inline mr-1" />
+              Start — <span className="font-normal text-brown-400">leave empty for immediate</span>
+            </label>
+            <input
+              type="datetime-local"
+              value={startAt}
+              onChange={e => setStartAt(e.target.value)}
+              className="input-base w-full"
+            />
+          </div>
+          <div className="flex-1 min-w-48">
+            <label className="block text-xs font-medium text-brown-500 mb-1.5">
+              <Calendar size={12} className="inline mr-1" />
+              End — <span className="font-normal text-brown-400">leave empty for forever</span>
+            </label>
+            <input
+              type="datetime-local"
+              value={endAt}
+              onChange={e => setEndAt(e.target.value)}
+              className="input-base w-full"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end">
           <button
             onClick={handleAdd}
             disabled={!newText.trim() || saving}
-            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg
+            className="flex items-center gap-2 px-4 py-2 rounded-lg
               bg-brown-600 hover:bg-brown-700 text-cream-100 text-sm font-medium
-              disabled:opacity-50 disabled:cursor-not-allowed self-start"
+              disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving
               ? <span className="w-4 h-4 border-2 border-cream-200 border-t-transparent rounded-full animate-spin" />
@@ -120,7 +162,7 @@ export default function AnnouncementsPage() {
               className={clsx('card p-4 flex gap-4 items-start group', !item.is_active && 'opacity-60')}
             >
               <div className={clsx(
-                'mt-0.5 w-2 h-2 rounded-full flex-shrink-0',
+                'mt-1 w-2 h-2 rounded-full flex-shrink-0',
                 item.is_active ? 'bg-green-500' : 'bg-brown-200'
               )} />
 
@@ -131,7 +173,15 @@ export default function AnnouncementsPage() {
                 )}>
                   {item.text}
                 </p>
-                <p className="text-xs text-brown-300 mt-1.5">{formatDate(item.created_at)}</p>
+                <div className="flex flex-wrap items-center gap-3 mt-1.5">
+                  <span className="text-xs text-brown-300">Added {formatDate(item.created_at)}</span>
+                  {scheduleLabel(item) && (
+                    <span className="inline-flex items-center gap-1 text-xs text-brown-500 bg-brown-50 border border-warm-border rounded-full px-2 py-0.5">
+                      <Calendar size={10} />
+                      {scheduleLabel(item)}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -12,6 +12,8 @@ export interface Announcement {
   id: string
   text: string
   is_active: boolean
+  start_at: string | null   // null = immediate
+  end_at: string | null     // null = forever
   created_at: string
 }
 
