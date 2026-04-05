@@ -13,9 +13,12 @@ type ItemDraft = Omit<Item, 'id' | 'created_at'>
 export default function ItemsPage() {
   const { t } = useI18n()
   const [items, setItems] = useState<Item[]>([])
+  const [filter, setFilter] = useState<'all' | 'bread' | 'pastry'>('all')
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState<'new' | Item | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const filtered = filter === 'all' ? items : items.filter(i => i.category === filter)
 
   useEffect(() => {
     fetchItems()
@@ -87,18 +90,35 @@ export default function ItemsPage() {
         </button>
       </div>
 
+      <div className="flex gap-2 mb-6">
+        {(['all', 'bread', 'pastry'] as const).map(cat => (
+          <button
+            key={cat}
+            onClick={() => setFilter(cat)}
+            className={clsx(
+              'px-4 py-1.5 rounded-full text-sm font-medium border transition-colors',
+              filter === cat
+                ? 'bg-brown-600 text-cream-100 border-brown-600'
+                : 'bg-white text-brown-500 border-warm-border hover:bg-cream-100'
+            )}
+          >
+            {cat === 'all' ? `All (${items.length})` : cat === 'bread' ? `🍞 Breads (${items.filter(i => i.category === 'bread').length})` : `🥐 Pastries (${items.filter(i => i.category === 'pastry').length})`}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <div className="flex justify-center py-32">
           <div className="w-6 h-6 border-2 border-brown-300 border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : items.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="card p-16 text-center">
           <ShoppingBasket className="mx-auto text-brown-200 mb-3" size={40} />
-          <p className="text-brown-400 text-sm">{t('items.empty')}</p>
+          <p className="text-brown-400 text-sm">{items.length === 0 ? t('items.empty') : 'No items in this category.'}</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map(item => (
+          {filtered.map(item => (
             <div key={item.id} className="card p-4 flex flex-col group hover:shadow-md transition-shadow">
               <div className="aspect-video rounded-lg bg-cream-100 mb-3 overflow-hidden flex items-center justify-center relative">
                 {item.images[0] ? (
