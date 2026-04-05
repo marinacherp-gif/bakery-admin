@@ -93,7 +93,8 @@ export function CartView({ phone }: { phone: string | null }) {
                   <span className="text-sm font-semibold text-brown-800 w-4 text-center">{item.quantity}</span>
                   <button
                     onClick={() => increment(item.id, item.isHalf)}
-                    className="w-7 h-7 rounded-full bg-brown-700 flex items-center justify-center text-cream-100 hover:bg-brown-800"
+                    disabled={item.quantity >= item.maxQuantity}
+                    className="w-7 h-7 rounded-full flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-brown-700 text-cream-100 hover:bg-brown-800"
                   >
                     <Plus size={12} />
                   </button>

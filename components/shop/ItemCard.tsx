@@ -9,13 +9,19 @@ import clsx from 'clsx'
 
 export function ItemCard({ item }: { item: Item }) {
   const { t } = useShopI18n()
-  const { addItem } = useCart()
+  const { addItem, items: cartItems } = useCart()
   const [isHalf, setIsHalf] = useState(false)
   const [added, setAdded] = useState(false)
   const [imgIndex, setImgIndex] = useState(0)
 
   const soldOut = item.quantity === 0
   const displayPrice = isHalf ? item.price * 0.5 : item.price
+
+  // Total quantity of this item already in cart (both half and full)
+  const inCart = cartItems
+    .filter(i => i.id === item.id)
+    .reduce((sum, i) => sum + i.quantity, 0)
+  const atMax = inCart >= item.quantity
   const images = item.images.filter(Boolean)
   const hasMultiple = images.length > 1
 
@@ -33,6 +39,7 @@ export function ItemCard({ item }: { item: Item }) {
       id: item.id,
       name: item.name,
       price: item.price,
+      maxQuantity: item.quantity,
       image: images[0] ?? null,
       canBuyHalf: item.can_buy_half,
       isHalf,
@@ -134,10 +141,10 @@ export function ItemCard({ item }: { item: Item }) {
           <span className="text-sm font-bold text-brown-700">₪{displayPrice}</span>
           <button
             onClick={handleAdd}
-            disabled={soldOut}
+            disabled={soldOut || atMax}
             className={clsx(
               'flex items-center gap-1 rounded-xl text-xs font-medium py-1.5 px-2.5 transition-colors flex-1 justify-center',
-              soldOut
+              soldOut || atMax
                 ? 'bg-brown-100 text-brown-300 cursor-not-allowed'
                 : added
                 ? 'bg-green-500 text-white'
@@ -145,7 +152,7 @@ export function ItemCard({ item }: { item: Item }) {
             )}
           >
             <ShoppingCart size={12} />
-            {added ? '✓' : t('items.addToCart')}
+            {added ? '✓' : atMax ? `מקס (${item.quantity})` : t('items.addToCart')}
           </button>
         </div>
       </div>

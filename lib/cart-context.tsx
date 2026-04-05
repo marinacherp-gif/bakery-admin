@@ -7,6 +7,7 @@ export interface CartItem {
   name: string
   price: number
   quantity: number
+  maxQuantity: number
   image: string | null
   canBuyHalf: boolean | null
   isHalf: boolean
@@ -39,7 +40,9 @@ function reducer(state: CartItem[], action: Action): CartItem[] {
       return state.filter(i => !(i.id === action.id && i.isHalf === action.isHalf))
     case 'INCREMENT':
       return state.map(i =>
-        i.id === action.id && i.isHalf === action.isHalf ? { ...i, quantity: i.quantity + 1 } : i
+        i.id === action.id && i.isHalf === action.isHalf
+          ? { ...i, quantity: Math.min(i.quantity + 1, i.maxQuantity) }
+          : i
       )
     case 'DECREMENT':
       return state
