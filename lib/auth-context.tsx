@@ -19,7 +19,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-const ALLOWED_EMAILS = ['marina.leshetz@gmail.com', 'labread33@gmail.com']
+const ALLOWED_EMAILS = ['marina.leshetz@gmail.com', 'labread33@gmail.com', 'Sinaiski@gmail.com']
 
 function toUser(u: SupabaseUser): User | null {
   if (!u.email || !ALLOWED_EMAILS.includes(u.email)) return null
