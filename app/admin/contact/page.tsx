@@ -75,66 +75,40 @@ export default function ContactPage() {
 
       <form onSubmit={handleSave} className="max-w-xl">
         <div className="card p-6 space-y-5 mb-6">
-          {/* Phone */}
           <div>
             <label className="block text-sm font-medium text-brown-700 mb-1.5">{t('contact.phone')}</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-              </span>
-              <input
-                type="tel"
-                value={info.phone}
-                onChange={e => set('phone', e.target.value)}
-                placeholder={t('contact.phonePlaceholder')}
-                className="input-base pl-9"
-              />
-            </div>
+            <input
+              type="tel"
+              value={info.phone}
+              onChange={e => set('phone', e.target.value)}
+              placeholder={t('contact.phonePlaceholder')}
+              className="input-base w-full"
+            />
           </div>
 
-          {/* Email */}
           <div>
             <label className="block text-sm font-medium text-brown-700 mb-1.5">{t('contact.email')}</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </span>
-              <input
-                type="email"
-                value={info.email}
-                onChange={e => set('email', e.target.value)}
-                placeholder={t('contact.emailPlaceholder')}
-                className="input-base pl-9"
-              />
-            </div>
+            <input
+              type="email"
+              value={info.email}
+              onChange={e => set('email', e.target.value)}
+              placeholder={t('contact.emailPlaceholder')}
+              className="input-base w-full"
+            />
           </div>
 
-          {/* Address */}
           <div>
             <label className="block text-sm font-medium text-brown-700 mb-1.5">{t('contact.address')}</label>
-            <div className="relative">
-              <span className="absolute left-3 top-3 text-brown-400">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </span>
-              <textarea
-                value={info.address}
-                onChange={e => set('address', e.target.value)}
-                placeholder={t('contact.addressPlaceholder')}
-                rows={2}
-                className="input-base pl-9 resize-none"
-              />
-            </div>
+            <textarea
+              value={info.address}
+              onChange={e => set('address', e.target.value)}
+              placeholder={t('contact.addressPlaceholder')}
+              rows={2}
+              className="input-base resize-none w-full"
+            />
           </div>
         </div>
 
-        {/* Social */}
         <div className="card p-6 space-y-5 mb-6">
           <h2 className="text-sm font-semibold text-brown-700">
             {t('contact.social')}{' '}
@@ -143,28 +117,32 @@ export default function ContactPage() {
 
           <div>
             <label className="block text-sm font-medium text-brown-700 mb-1.5">{t('contact.instagram')}</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400 text-sm">instagram.com/</span>
+            <div className="flex rounded-lg border border-warm-border overflow-hidden focus-within:ring-2 focus-within:ring-brown-200 focus-within:border-brown-400">
+              <span className="flex items-center px-3 bg-cream-100 text-brown-400 text-sm border-r border-warm-border whitespace-nowrap flex-shrink-0">
+                instagram.com/
+              </span>
               <input
                 type="text"
                 value={info.instagram.replace(/^https?:\/\/(www\.)?instagram\.com\/?/, '')}
                 onChange={e => set('instagram', e.target.value ? `https://instagram.com/${e.target.value}` : '')}
                 placeholder="yourbakery"
-                className="input-base pl-[7.5rem]"
+                className="flex-1 px-3 py-2 text-sm text-brown-800 bg-white outline-none min-w-0"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-brown-700 mb-1.5">{t('contact.facebook')}</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-400 text-sm">facebook.com/</span>
+            <div className="flex rounded-lg border border-warm-border overflow-hidden focus-within:ring-2 focus-within:ring-brown-200 focus-within:border-brown-400">
+              <span className="flex items-center px-3 bg-cream-100 text-brown-400 text-sm border-r border-warm-border whitespace-nowrap flex-shrink-0">
+                facebook.com/
+              </span>
               <input
                 type="text"
                 value={info.facebook.replace(/^https?:\/\/(www\.)?facebook\.com\/?/, '')}
                 onChange={e => set('facebook', e.target.value ? `https://facebook.com/${e.target.value}` : '')}
                 placeholder="yourbakery"
-                className="input-base pl-[7.5rem]"
+                className="flex-1 px-3 py-2 text-sm text-brown-800 bg-white outline-none min-w-0"
               />
             </div>
           </div>
