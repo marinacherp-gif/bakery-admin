@@ -4,7 +4,7 @@ import { useState } from 'react'
 import type { Item } from '@/lib/supabase'
 import { useCart } from '@/lib/cart-context'
 import { useShopI18n } from '@/lib/shop-i18n'
-import { ShoppingCart, Wheat, Leaf } from 'lucide-react'
+import { ShoppingCart, Wheat, Leaf, ChevronLeft, ChevronRight } from 'lucide-react'
 import clsx from 'clsx'
 
 export function ItemCard({ item }: { item: Item }) {
@@ -12,16 +12,28 @@ export function ItemCard({ item }: { item: Item }) {
   const { addItem } = useCart()
   const [isHalf, setIsHalf] = useState(false)
   const [added, setAdded] = useState(false)
+  const [imgIndex, setImgIndex] = useState(0)
 
   const soldOut = item.quantity === 0
   const displayPrice = isHalf ? item.price * 0.5 : item.price
+  const images = item.images.filter(Boolean)
+  const hasMultiple = images.length > 1
+
+  const prev = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setImgIndex(i => (i - 1 + images.length) % images.length)
+  }
+  const next = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setImgIndex(i => (i + 1) % images.length)
+  }
 
   const handleAdd = () => {
     addItem({
       id: item.id,
       name: item.name,
       price: item.price,
-      image: item.images[0] ?? null,
+      image: images[0] ?? null,
       canBuyHalf: item.can_buy_half,
       isHalf,
     })
@@ -33,12 +45,44 @@ export function ItemCard({ item }: { item: Item }) {
     <div className={clsx('bg-white rounded-2xl border border-warm-border overflow-hidden flex flex-col shadow-sm', soldOut && 'opacity-70')}>
       {/* Image */}
       <div className="aspect-square bg-cream-100 relative flex items-center justify-center overflow-hidden">
-        {item.images[0] ? (
+        {images.length > 0 ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
+          <img src={images[imgIndex]} alt={item.name} className="w-full h-full object-cover transition-opacity duration-200" />
         ) : (
           <Wheat size={32} className="text-brown-200" />
         )}
+
+        {/* Prev / Next arrows */}
+        {hasMultiple && (
+          <>
+            <button
+              onClick={prev}
+              className="absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/30 text-white flex items-center justify-center"
+            >
+              <ChevronLeft size={14} />
+            </button>
+            <button
+              onClick={next}
+              className="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/30 text-white flex items-center justify-center"
+            >
+              <ChevronRight size={14} />
+            </button>
+            {/* Dots */}
+            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => { e.preventDefault(); setImgIndex(i) }}
+                  className={clsx(
+                    'w-1.5 h-1.5 rounded-full transition-colors',
+                    i === imgIndex ? 'bg-white' : 'bg-white/50'
+                  )}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
         {soldOut && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
