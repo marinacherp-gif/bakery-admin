@@ -1,0 +1,110 @@
+'use client'
+
+import { useState } from 'react'
+import type { Item } from '@/lib/supabase'
+import { useCart } from '@/lib/cart-context'
+import { useShopI18n } from '@/lib/shop-i18n'
+import { ShoppingCart, Wheat, Leaf } from 'lucide-react'
+import clsx from 'clsx'
+
+export function ItemCard({ item }: { item: Item }) {
+  const { t } = useShopI18n()
+  const { addItem } = useCart()
+  const [isHalf, setIsHalf] = useState(false)
+  const [added, setAdded] = useState(false)
+
+  const soldOut = item.quantity === 0
+  const displayPrice = isHalf ? item.price * 0.5 : item.price
+
+  const handleAdd = () => {
+    addItem({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.images[0] ?? null,
+      canBuyHalf: item.can_buy_half,
+      isHalf,
+    })
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1200)
+  }
+
+  return (
+    <div className={clsx('bg-white rounded-2xl border border-warm-border overflow-hidden flex flex-col shadow-sm', soldOut && 'opacity-70')}>
+      {/* Image */}
+      <div className="aspect-square bg-cream-100 relative flex items-center justify-center overflow-hidden">
+        {item.images[0] ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
+        ) : (
+          <Wheat size={32} className="text-brown-200" />
+        )}
+        {soldOut && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+              {t('items.soldOut')}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-2.5 flex flex-col gap-1.5 flex-1">
+        <p className="text-xs font-semibold text-brown-800 leading-tight line-clamp-2">{item.name}</p>
+        {item.description && (
+          <p className="text-[11px] text-brown-400 line-clamp-2 leading-relaxed">{item.description}</p>
+        )}
+
+        {/* Badges */}
+        <div className="flex flex-wrap gap-1">
+          {item.is_vegan && (
+            <span className="inline-flex items-center gap-0.5 text-[10px] bg-green-50 text-green-700 border border-green-100 rounded-full px-1.5 py-0.5">
+              <Leaf size={8} /> {t('items.vegan')}
+            </span>
+          )}
+          {item.can_buy_half && (
+            <span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-100 rounded-full px-1.5 py-0.5">
+              {t('items.half')}
+            </span>
+          )}
+        </div>
+
+        {/* Half toggle */}
+        {item.can_buy_half && !soldOut && (
+          <button
+            type="button"
+            onClick={() => setIsHalf(v => !v)}
+            className={clsx(
+              'text-[11px] font-medium rounded-lg px-2 py-1 border transition-colors w-full',
+              isHalf
+                ? 'bg-brown-600 text-cream-100 border-brown-600'
+                : 'bg-white text-brown-500 border-warm-border hover:bg-cream-100'
+            )}
+          >
+            {t('cart.half')} {isHalf ? '✓' : ''}
+          </button>
+        )}
+
+        {/* Price + Add */}
+        <div className="flex items-center justify-between mt-auto pt-1 gap-2">
+          <span className="text-sm font-bold text-brown-700">₪{displayPrice}</span>
+          <button
+            onClick={handleAdd}
+            disabled={soldOut}
+            className={clsx(
+              'flex items-center gap-1 rounded-xl text-xs font-medium py-1.5 px-2.5 transition-colors flex-1 justify-center',
+              soldOut
+                ? 'bg-brown-100 text-brown-300 cursor-not-allowed'
+                : added
+                ? 'bg-green-500 text-white'
+                : 'bg-brown-700 text-cream-100 hover:bg-brown-800 active:scale-95'
+            )}
+          >
+            <ShoppingCart size={12} />
+            {added ? '✓' : t('items.addToCart')}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
