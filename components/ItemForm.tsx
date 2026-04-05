@@ -14,6 +14,7 @@ const EMPTY_DRAFT: ItemDraft = {
   description: '',
   images: [],
   price: 0,
+  category: 'bread',
   can_be_cut: false,
   can_buy_half: null,
   is_vegan: false,
@@ -51,8 +52,8 @@ export function ItemForm({ initial, onSave, onCancel }: ItemFormProps) {
   const [draft, setDraft] = useState<ItemDraft>(() =>
     initial
       ? { name: initial.name, description: initial.description, images: initial.images,
-          price: initial.price, can_be_cut: initial.can_be_cut, can_buy_half: initial.can_buy_half,
-          is_vegan: initial.is_vegan, available_days: initial.available_days }
+          price: initial.price, category: initial.category ?? 'bread', can_be_cut: initial.can_be_cut,
+          can_buy_half: initial.can_buy_half, is_vegan: initial.is_vegan, available_days: initial.available_days }
       : { ...EMPTY_DRAFT, available_days: [] }
   )
   const [saving, setSaving] = useState(false)
@@ -117,16 +118,40 @@ export function ItemForm({ initial, onSave, onCancel }: ItemFormProps) {
             {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
           </div>
 
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium text-brown-700 mb-1.5">
+              Category <span className="text-red-400">*</span>
+            </label>
+            <div className="flex gap-3">
+              {(['bread', 'pastry'] as const).map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => set('category', cat)}
+                  className={clsx(
+                    'flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors capitalize',
+                    draft.category === cat
+                      ? 'bg-brown-600 text-cream-100 border-brown-600'
+                      : 'bg-white text-brown-600 border-warm-border hover:bg-cream-100'
+                  )}
+                >
+                  {cat === 'bread' ? '🍞 Bread' : '🥐 Pastry'}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-brown-700 mb-1.5">
               {t('itemForm.description')}
-              <span className="text-brown-300 font-normal ml-1">({draft.description.length}/100)</span>
+              <span className="text-brown-300 font-normal ml-1">({draft.description.length}/500)</span>
             </label>
             <textarea
               value={draft.description}
-              onChange={e => set('description', e.target.value.slice(0, 100))}
-              rows={3}
+              onChange={e => set('description', e.target.value.slice(0, 500))}
+              rows={4}
               className="input-base resize-none"
             />
           </div>

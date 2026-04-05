@@ -120,6 +120,16 @@ export default function ItemsPage() {
                 )}
 
                 <div className="flex flex-wrap gap-1 mb-3">
+                  {item.category && (
+                    <span className={clsx(
+                      'px-2 py-0.5 rounded-full text-xs font-medium border',
+                      item.category === 'bread'
+                        ? 'bg-amber-50 text-amber-700 border-amber-100'
+                        : 'bg-pink-50 text-pink-700 border-pink-100'
+                    )}>
+                      {item.category === 'bread' ? '🍞 Bread' : '🥐 Pastry'}
+                    </span>
+                  )}
                   {item.is_vegan && (
                     <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs bg-green-50 text-green-700 border border-green-100">
                       <Leaf size={10} /> {t('items.vegan')}
