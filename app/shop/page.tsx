@@ -1,3 +1,5 @@
+export const revalidate = 0
+
 import { supabase } from '@/lib/supabase'
 import { Wheat, Cookie, Megaphone } from 'lucide-react'
 import { CategoryCard } from '@/components/shop/CategoryCard'

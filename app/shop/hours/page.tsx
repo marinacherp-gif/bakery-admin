@@ -1,3 +1,5 @@
+export const revalidate = 0
+
 import { supabase } from '@/lib/supabase'
 import { Clock, MessageCircle, Phone } from 'lucide-react'
 import { AnnouncementStrip } from '@/components/shop/AnnouncementStrip'
