@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Announcement } from '@/lib/supabase'
 import { useI18n } from '@/lib/i18n'
-import { Plus, Trash2, ToggleLeft, ToggleRight, Megaphone, Calendar } from 'lucide-react'
+import { Plus, Trash2, ToggleLeft, ToggleRight, Megaphone, Calendar, Pencil, Check, X } from 'lucide-react'
 import clsx from 'clsx'
 
 export default function AnnouncementsPage() {
@@ -16,6 +16,11 @@ export default function AnnouncementsPage() {
   const [endAt, setEndAt] = useState('')
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editText, setEditText] = useState('')
+  const [editStartAt, setEditStartAt] = useState('')
+  const [editEndAt, setEditEndAt] = useState('')
+  const [editSaving, setEditSaving] = useState(false)
 
   useEffect(() => { fetchItems() }, [])
 
@@ -56,6 +61,38 @@ export default function AnnouncementsPage() {
     await supabase.from('announcements').delete().eq('id', id)
     setItems(prev => prev.filter(a => a.id !== id))
     setDeletingId(null)
+  }
+
+  const startEdit = (item: Announcement) => {
+    setEditingId(item.id)
+    setEditText(item.text)
+    setEditStartAt(item.start_at ? item.start_at.slice(0, 16) : '')
+    setEditEndAt(item.end_at ? item.end_at.slice(0, 16) : '')
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditText('')
+    setEditStartAt('')
+    setEditEndAt('')
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingId || !editText.trim()) return
+    setEditSaving(true)
+    const { data } = await supabase
+      .from('announcements')
+      .update({
+        text: editText.trim(),
+        start_at: editStartAt ? new Date(editStartAt).toISOString() : null,
+        end_at: editEndAt ? new Date(editEndAt).toISOString() : null,
+      })
+      .eq('id', editingId)
+      .select()
+      .single()
+    if (data) setItems(prev => prev.map(a => a.id === editingId ? data : a))
+    setEditSaving(false)
+    cancelEdit()
   }
 
   const handleToggle = async (item: Announcement) => {
@@ -159,7 +196,7 @@ export default function AnnouncementsPage() {
           {items.map(item => (
             <div
               key={item.id}
-              className={clsx('card p-4 flex gap-4 items-start group', !item.is_active && 'opacity-60')}
+              className={clsx('card p-4 flex gap-4 items-start group', !item.is_active && editingId !== item.id && 'opacity-60')}
             >
               <div className={clsx(
                 'mt-1 w-2 h-2 rounded-full flex-shrink-0',
@@ -167,46 +204,101 @@ export default function AnnouncementsPage() {
               )} />
 
               <div className="flex-1 min-w-0">
-                <p className={clsx(
-                  'text-sm leading-relaxed',
-                  item.is_active ? 'text-brown-800' : 'text-brown-400 line-through'
-                )}>
-                  {item.text}
-                </p>
-                <div className="flex flex-wrap items-center gap-3 mt-1.5">
-                  <span className="text-xs text-brown-300">Added {formatDate(item.created_at)}</span>
-                  {scheduleLabel(item) && (
-                    <span className="inline-flex items-center gap-1 text-xs text-brown-500 bg-brown-50 border border-warm-border rounded-full px-2 py-0.5">
-                      <Calendar size={10} />
-                      {scheduleLabel(item)}
-                    </span>
-                  )}
-                </div>
+                {editingId === item.id ? (
+                  <div className="flex flex-col gap-3">
+                    <textarea
+                      value={editText}
+                      onChange={e => setEditText(e.target.value)}
+                      rows={2}
+                      className="input-base resize-none w-full text-sm"
+                    />
+                    <div className="flex flex-wrap gap-3">
+                      <div className="flex-1 min-w-40">
+                        <label className="block text-xs font-medium text-brown-500 mb-1">
+                          <Calendar size={11} className="inline mr-1" />Start
+                        </label>
+                        <input type="datetime-local" value={editStartAt} onChange={e => setEditStartAt(e.target.value)} className="input-base w-full text-sm" />
+                      </div>
+                      <div className="flex-1 min-w-40">
+                        <label className="block text-xs font-medium text-brown-500 mb-1">
+                          <Calendar size={11} className="inline mr-1" />End
+                        </label>
+                        <input type="datetime-local" value={editEndAt} onChange={e => setEditEndAt(e.target.value)} className="input-base w-full text-sm" />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSaveEdit}
+                        disabled={editSaving || !editText.trim()}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brown-600 hover:bg-brown-700 text-cream-100 text-xs font-medium disabled:opacity-50"
+                      >
+                        {editSaving
+                          ? <span className="w-3 h-3 border-2 border-cream-200 border-t-transparent rounded-full animate-spin" />
+                          : <Check size={13} />
+                        }
+                        Save
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-warm-border text-brown-500 hover:bg-brown-50 text-xs font-medium"
+                      >
+                        <X size={13} /> Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className={clsx(
+                      'text-sm leading-relaxed',
+                      item.is_active ? 'text-brown-800' : 'text-brown-400 line-through'
+                    )}>
+                      {item.text}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3 mt-1.5">
+                      <span className="text-xs text-brown-300">Added {formatDate(item.created_at)}</span>
+                      {scheduleLabel(item) && (
+                        <span className="inline-flex items-center gap-1 text-xs text-brown-500 bg-brown-50 border border-warm-border rounded-full px-2 py-0.5">
+                          <Calendar size={10} />
+                          {scheduleLabel(item)}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
-              <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => handleToggle(item)}
-                  title={item.is_active ? t('announcements.deactivate') : t('announcements.activate')}
-                  className="p-1.5 rounded-lg hover:bg-brown-50 text-brown-400 hover:text-brown-600"
-                >
-                  {item.is_active
-                    ? <ToggleRight size={18} className="text-green-500" />
-                    : <ToggleLeft size={18} />
-                  }
-                </button>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  disabled={deletingId === item.id}
-                  title={t('announcements.delete')}
-                  className="p-1.5 rounded-lg hover:bg-red-50 text-brown-300 hover:text-red-500"
-                >
-                  {deletingId === item.id
-                    ? <span className="w-4 h-4 border-2 border-brown-300 border-t-transparent rounded-full animate-spin inline-block" />
-                    : <Trash2 size={16} />
-                  }
-                </button>
-              </div>
+              {editingId !== item.id && (
+                <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => startEdit(item)}
+                    title="Edit"
+                    className="p-1.5 rounded-lg hover:bg-brown-50 text-brown-400 hover:text-brown-600"
+                  >
+                    <Pencil size={15} />
+                  </button>
+                  <button
+                    onClick={() => handleToggle(item)}
+                    title={item.is_active ? t('announcements.deactivate') : t('announcements.activate')}
+                    className="p-1.5 rounded-lg hover:bg-brown-50 text-brown-400 hover:text-brown-600"
+                  >
+                    {item.is_active
+                      ? <ToggleRight size={18} className="text-green-500" />
+                      : <ToggleLeft size={18} />
+                    }
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    disabled={deletingId === item.id}
+                    title={t('announcements.delete')}
+                    className="p-1.5 rounded-lg hover:bg-red-50 text-brown-300 hover:text-red-500"
+                  >
+                    {deletingId === item.id
+                      ? <span className="w-4 h-4 border-2 border-brown-300 border-t-transparent rounded-full animate-spin inline-block" />
+                      : <Trash2 size={16} />
+                    }
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
