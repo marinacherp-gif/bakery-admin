@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
 import { useI18n } from '@/lib/i18n'
 import { useRouter } from 'next/navigation'
-import { Megaphone, Clock, ShoppingBasket, Phone, LogOut, Menu, X } from 'lucide-react'
+import { Megaphone, Clock, ShoppingBasket, Phone, LogOut, Menu, X, Users } from 'lucide-react'
 import { useState } from 'react'
 import clsx from 'clsx'
 
@@ -21,6 +21,7 @@ export function Sidebar() {
     { href: '/admin/opening-hours', label: t('nav.openingHours'), icon: Clock },
     { href: '/admin/items', label: t('nav.items'), icon: ShoppingBasket },
     { href: '/admin/contact', label: t('nav.contact'), icon: Phone },
+    { href: '/admin/users', label: 'Admin Users', icon: Users },
   ]
 
   const handleSignOut = async () => {

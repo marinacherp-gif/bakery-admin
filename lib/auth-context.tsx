@@ -19,10 +19,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-const ALLOWED_EMAILS = ['marina.leshetz@gmail.com', 'labread33@gmail.com', 'sinaiski@gmail.com']
-
-function toUser(u: SupabaseUser): User | null {
-  if (!u.email || !ALLOWED_EMAILS.includes(u.email.toLowerCase())) return null
+function toUser(u: SupabaseUser, allowedEmails: string[]): User | null {
+  if (!u.email || !allowedEmails.includes(u.email.toLowerCase())) return null
   return {
     email: u.email!,
     name: u.user_metadata?.full_name || u.user_metadata?.name || u.email!.split('@')[0],
@@ -35,18 +33,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(toUser(session.user))
-      }
+    const init = async () => {
+      // Fetch allowed emails from DB
+      const { data } = await supabase.from('admin_users').select('email')
+      const emails = (data ?? []).map((r: { email: string }) => r.email.toLowerCase())
+
+      // Get initial session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) setUser(toUser(session.user, emails))
       setLoading(false)
-    })
+    }
+    init()
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const { data } = await supabase.from('admin_users').select('email')
+      const emails = (data ?? []).map((r: { email: string }) => r.email.toLowerCase())
       if (session?.user) {
-        setUser(toUser(session.user))
+        setUser(toUser(session.user, emails))
       } else {
         setUser(null)
       }
