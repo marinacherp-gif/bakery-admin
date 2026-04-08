@@ -21,6 +21,10 @@ export function CartView({ phone }: { phone: string | null }) {
     ? `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(buildOrderText())}`
     : '#'
 
+  const bitHref = phone
+    ? `https://www.bitpay.co.il/app/pay?phone=${phone.replace(/[^0-9]/g, '')}&sum=${total.toFixed(0)}&details=${encodeURIComponent('הזמנה מלאבריד')}`
+    : '#'
+
   if (itemCount === 0) {
     return (
       <div dir="rtl" className="flex flex-col items-center justify-center py-24 px-4 text-center">
@@ -111,6 +115,17 @@ export function CartView({ phone }: { phone: string | null }) {
           <span className="text-base font-semibold text-brown-700">{t('cart.total')}</span>
           <span className="text-xl font-bold text-brown-800">₪{total.toFixed(0)}</span>
         </div>
+        <a
+          href={bitHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 text-white rounded-2xl py-3.5 font-semibold text-base w-full transition-colors mb-2"
+          style={{ backgroundColor: '#00A4E4' }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/bit-logo.png" alt="Bit" className="h-5 w-auto" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+          שלם עם Bit
+        </a>
         <a
           href={whatsappHref}
           target="_blank"
