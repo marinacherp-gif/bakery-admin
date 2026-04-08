@@ -121,17 +121,29 @@ export function CartView({ phone }: { phone: string | null }) {
           <span className="text-base font-semibold text-brown-700">{t('cart.total')}</span>
           <span className="text-xl font-bold text-brown-800">₪{total.toFixed(0)}</span>
         </div>
-        <a
-          href={bitHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 text-white rounded-2xl py-3.5 font-semibold text-base w-full transition-colors mb-2"
-          style={{ backgroundColor: '#00A4E4' }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/bit-logo.png" alt="Bit" className="h-5 w-auto" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-          שלם עם Bit
-        </a>
+        <div className="rounded-2xl overflow-hidden mb-2" style={{ backgroundColor: '#00A4E4' }}>
+          <a
+            href={bitHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 text-white py-3.5 font-semibold text-base w-full"
+          >
+            שלם עם Bit
+          </a>
+          {phone && (
+            <div className="flex items-center justify-center gap-2 pb-3 text-white/90 text-sm">
+              <span>שלח ל:</span>
+              <button
+                onClick={() => navigator.clipboard.writeText(toBitPhone(phone))}
+                className="font-mono font-bold underline underline-offset-2 tracking-wide"
+                title="העתק מספר"
+              >
+                {toBitPhone(phone)}
+              </button>
+              <span className="text-white/60 text-xs">(לחץ להעתקה)</span>
+            </div>
+          )}
+        </div>
         <a
           href={whatsappHref}
           target="_blank"
