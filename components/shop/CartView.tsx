@@ -21,8 +21,14 @@ export function CartView({ phone }: { phone: string | null }) {
     ? `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(buildOrderText())}`
     : '#'
 
+  const toBitPhone = (p: string) => {
+    const digits = p.replace(/[^0-9]/g, '')
+    // Convert 972XXXXXXXXX → 0XXXXXXXXX (local Israeli format Bit expects)
+    return digits.startsWith('972') ? '0' + digits.slice(3) : digits
+  }
+
   const bitHref = phone
-    ? `https://www.bitpay.co.il/app/pay?phone=${phone.replace(/[^0-9]/g, '')}&sum=${total.toFixed(0)}&details=${encodeURIComponent('הזמנה מלאבריד')}`
+    ? `https://www.bitpay.co.il/app/pay?phone=${toBitPhone(phone)}&sum=${total.toFixed(0)}&details=${encodeURIComponent('הזמנה מלאבריד')}`
     : '#'
 
   if (itemCount === 0) {
