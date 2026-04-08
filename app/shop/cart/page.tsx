@@ -1,3 +1,5 @@
+export const revalidate = 0
+
 import { supabase } from '@/lib/supabase'
 import { CartView } from '@/components/shop/CartView'
 
